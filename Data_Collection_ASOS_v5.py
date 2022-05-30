@@ -56,9 +56,7 @@ if __name__ == "__main__":
                     a_tag = articles.find_element_by_tag_name('a')
                     link = a_tag.get_attribute('href')
                     self.shop_link_list.append(link)
-                    
-
-            print(self.imagesrc_list)
+   
             print(f'There are {len(self.shop_link_list)} in this link list')
         
         def load_more_products(self):
@@ -215,6 +213,7 @@ if __name__ == "__main__":
             
         def scrape_website(self):
             self.load_and_accept_cookies()
+            self.load_more_products()
             self.get_product_links()
             self.get_product_data()
             self.save_data()
