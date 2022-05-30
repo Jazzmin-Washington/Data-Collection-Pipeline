@@ -45,7 +45,10 @@ if __name__ == "__main__":
             self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True');});",accept_cookies_button)
             accept_cookies_button.click()
             time.sleep(2)
-            return print(accept_cookies_button.get_attribute("automationTrack"))
+            if accept_cookies_button.get_attribute("automationTrack") == 'True':
+                return True
+            else:
+                return False
 
         # Collects the links on all the loaded products and saved to list
         def get_product_links(self):
@@ -87,7 +90,10 @@ if __name__ == "__main__":
                     self.actions.move_to_element(self.load_more_button)
                     self.load_more_button.click()
                     self.driver.implicitly_wait(5)
-            return print(self.load_more_button.get_attribute("automationTrack"))
+                if self.load_more_button.get_attribute("automationTrack") = 'True':
+                    return True
+                else:
+                    return False
 
         # Collects the data from the each of the collected links(product code, sale price etc.)
         def get_product_data(self):
