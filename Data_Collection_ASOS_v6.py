@@ -1,6 +1,5 @@
 #%%
 # ASOS Website
-from xml.sax.handler import all_features
 import selenium
 from selenium.webdriver import Chrome
 from selenium.webdriver.support.ui import WebDriverWait
