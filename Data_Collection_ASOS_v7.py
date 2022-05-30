@@ -38,6 +38,7 @@ class Scraper():
         self.n_pages = 5
         self.actions = ActionChains(self.driver)
         self.delay = 10
+     
 
 
     # Clicks the accept cookies button on the selenium driver
@@ -47,10 +48,8 @@ class Scraper():
         self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True' );});",accept_cookies_button)
         accept_cookies_button.click()
         time.sleep(2)
-        if accept_cookies_button.get_attribute("automationTrack") == 'True':
-                return True
-        else:
-                return False
+        self.unit_Test_cookies = accept_cookies_button.get_attribute("automationTrack")
+        return self.unit_Test_cookies
 
     # Collects the links on all the loaded products and saved to list
     def get_product_links(self):
@@ -80,6 +79,7 @@ class Scraper():
                 self.actions.move_to_element(self.load_more_button)
                 self.load_more_button.click()
                 self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True');});",self.load_more_button)
+                self.unit_Test_Load = self.load_more_button.get_attribute("automationTrack")
                 self.driver.implicitly_wait(10)
                 self.load_pages +=1
 
@@ -92,10 +92,10 @@ class Scraper():
                 self.actions.move_to_element(self.load_more_button)
                 self.load_more_button.click()
                 self.driver.implicitly_wait(5)
-        if self.load_more_button.get_attribute("automationTrack") == 'True':
-            return True
-        else: 
-            return False
+                self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True');});",self.load_more_button)
+                self.unit_Test_Load = self.load_more_button.get_attribute("automationTrack")
+            return self.unit_Test_Load
+        
 
     # Collects the data from the each of the collected links(product code, sale price etc.)
     def get_product_data(self):
@@ -233,7 +233,7 @@ class Scraper():
         df2.to_csv (r'ASOS_data/ASOS_Women__Org_Data_csv', index = org_index, header=True)
 
         if os.path.exists('ASOS_data/ASOS_Women_Data_csv') and os.path.exists('ASOS_data/ASOS_Women_Org_data'):
-            return True
+            return self.saving_data == True
     
     # Will download each of the images from their respective image sources for later
     def get_images(self):
@@ -252,10 +252,7 @@ class Scraper():
                 pass
             urllib.request.urlretrieve(image, f"ASOS_data/images/ASOS_image_{id}.jpg")
             number +=1
-            if os.path.exists(f"ASOS_data/images/ASOS_image_{id}.jpg"):
-                return True
-            else:
-                return False
+           
 
     # Final Function that calls all the functions above in the necessary order    
     def scrape_website(self):
@@ -268,8 +265,8 @@ class Scraper():
 
 
 # Begins the scraping process 
-if __name__ == "__main__":               
-    Scraper_ASOS= Scraper()
-    
-    
+if __name__ == "__main__":  
+    Scraper()            
+
+Scraper_ASOS = Scraper ()
 Scraper_ASOS.scrape_website() 
