@@ -107,23 +107,23 @@ ________________________________________________________________________________
  
  - Next. the `get_images()` function was created to download the images from the website on a local machine using the image source codes collecting from the `get_product_data()` functions using `urllib.requests`. A progress bar was also added using `tqdm` for easy visualisation.
  
-       def get_images(self):
-                  print(self.imagesrc_list)
-                  if not os.path.exists('ASOS_data/images'):
-                          os.makedirs('ASOS_data/images')
+        def get_images(self):
+            print(self.imagesrc_list)
+            if not os.path.exists('ASOS_data/images'):
+                    os.makedirs('ASOS_data/images')
 
-                  len_images = len(self.imagesrc_list)
-                  print(len_images)
-                  number = 1
-                  for i in tqdm(range(len_images)):
-                      id = self.full_item_list['product_id'][i]
-                      if self.full_item_list['product_id'][i] == '':
-                          id = number 
-                      image = self.imagesrc_list[i]
-                      if image == 'None':
-                          pass
-                      urllib.request.urlretrieve(image, f"ASOS_data/images/ASOS_image_{id}.jpg")
-                      number +=1
+            len_images = len(self.imagesrc_list)
+            print(len_images)
+            number = 1
+            for i in tqdm(range(len_images), 'Downloading images'):
+                id = self.full_item_list['product_id'][i]
+                if self.full_item_list['product_id'][i] == '' or 'None':
+                    id = number 
+                image = self.imagesrc_list[i]
+                if image == 'None':
+                    pass
+                urllib.request.urlretrieve(image, f"ASOS_data/images/ASOS_image_{id}.jpg")
+                number +=1
       
       ![image](https://user-images.githubusercontent.com/102431019/170530918-b17259cc-b27c-49ad-adb1-0ac3dca066fa.png)
        
