@@ -1,13 +1,3 @@
-#%%
-# ASOS Website
-import selenium
-from selenium.webdriver import Chrome
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import ElementNotInteractableException
 import urllib3 
@@ -28,7 +18,7 @@ class Scraper():
         self.full_item_list = {'product_id': [],'product_name': [], 'image':[], 'previous_price':[], 'sale_price': [], 'color':[], 'product_details':[], 'sizes': []}
         self.load_pages = 0
         self.delay = 10
-    
+
     def load_and_accept_cookies(self):
         time.sleep(10)
         accept_cookies_button = WebDriverWait(self.driver, self.delay).until(EC.presence_of_element_located((By.XPATH,'//*[@id="onetrust-accept-btn-handler"]')))
@@ -49,11 +39,11 @@ class Scraper():
                 img = articles.find_element_by_tag_name('img')
                 img_src = img.get_attribute('src')
                 self.imagesrc_list.append(img_src)
-     
-        print(self.imagesrc_list)
+
+
         print(f'There are {len(self.shop_link_list)} in this link list and {len(self.imagesrc_list)} in image source list')
-    
-    
+
+
     def load_more_products(self):
         for i in range(5):
             time.sleep(10)
@@ -73,8 +63,8 @@ class Scraper():
                 time.sleep(10)
                 self.actions.move_to_element(self.load_more_button)
                 self.load_more_button.click()
-                time.sleep(5)
-                
+                time.sleepr(5)
+
 
     def get_product_data(self):
         self.num_clothing_items = len(self.shop_link_list)
@@ -82,7 +72,7 @@ class Scraper():
             self.full_item_list['image'].append(self.imagesrc_list[i])
             time.sleep(10)
             self.driver.get(self.shop_link_list[i])
-      
+
             try:
                 time.sleep(10)
                 self.show_more_button = self.driver.find_element_by_xpath('//a[@class="show"]') 
@@ -95,7 +85,7 @@ class Scraper():
                 self.product_id = self.driver.find_element_by_xpath('//div[@class="product-code"]')
                 self.product_id_num =self.product_id.find_element_by_xpath('./p').text
                 self.full_item_list['product_id'].append(self.product_id_num)
-          
+
             except NoSuchElementException:
                 self.full_item_list['product_id'].append('None')
 
@@ -150,20 +140,23 @@ class Scraper():
             except NoSuchElementException:
                 self.full_item_list['sizes'].append('None')
 
-            
+
             self.organized_data  = {self.product_id_num:{'name':[product_name], 'previous_price':[previous_price], 'sale price':[sale_price], 'color':[colour], 'description':[ab_description], 'sizes':[sizes]}}
             self.full_product_data.append(self.organized_data)
             print(self.organized_data)
         print(self.full_product_data)
-            
+
 
     def scrape_website(self):
         self.load_and_accept_cookies()
+        self.load_more_products()
         self.get_product_links()
+        self.get_product_data()
         self.driver.close()
-    
+
 new_Scraper_ASOS= Scraper()
 new_Scraper_ASOS.scrape_website() 
+
 
             
 # %%
