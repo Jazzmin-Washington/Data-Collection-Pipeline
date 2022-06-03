@@ -82,6 +82,9 @@ class Scraper():
             self.full_item_list['image'].append(self.imagesrc_list[i])
             time.sleep(10)
             self.driver.get(self.shop_link_list[i])
+            '''
+            Need to add popup button
+            '''
 
             try:
                time.sleep(10)
