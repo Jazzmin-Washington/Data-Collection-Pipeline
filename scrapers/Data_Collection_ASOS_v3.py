@@ -72,7 +72,13 @@ class Scraper():
             self.full_item_list['image'].append(self.imagesrc_list[i])
             time.sleep(10)
             self.driver.get(self.shop_link_list[i])
-
+            
+            try:
+                self.driver.implicitly_wait(10)
+                self.popup = self.driver.find_element_by_xpath('//*[@id="att_lightbox_close"]')
+                self.popup.click()
+            except (ElementNotInteractableException, NoSuchElementException):
+                pass
             try:
                 time.sleep(10)
                 self.show_more_button = self.driver.find_element_by_xpath('//a[@class="show"]') 
