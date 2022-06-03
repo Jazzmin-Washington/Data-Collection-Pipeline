@@ -1,3 +1,12 @@
+ ASOS Website
+import selenium
+from selenium.webdriver import Chrome
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import ElementNotInteractableException
 import urllib3 
@@ -20,14 +29,14 @@ class Scraper():
         self.delay = 10
 
     def load_and_accept_cookies(self):
-        time.sleep(10)
+        self.driver.implicitly_wait(10)
         accept_cookies_button = WebDriverWait(self.driver, self.delay).until(EC.presence_of_element_located((By.XPATH,'//*[@id="onetrust-accept-btn-handler"]')))
         accept_cookies_button.click()
         time.sleep(1)
 
 
     def get_product_links(self):
-        time.sleep(10)
+        self.driver.implicitly_wait(10)
         self.clothing_container = self.driver.find_element_by_xpath('//div[@class="_3pQmLlY"]')
         self.clothing_section = self.clothing_container.find_elements_by_xpath('./section')
         for section in self.clothing_section:
@@ -46,33 +55,32 @@ class Scraper():
 
     def load_more_products(self):
         for i in range(5):
-            time.sleep(10)
+            self.driver.implicitly_wait(10)
             self.load_more_button = self.driver.find_element_by_xpath('//a[@data-auto-id = "loadMoreProducts"]')
             self.actions = ActionChains(self.driver)
             self.actions.move_to_element(self.load_more_button)
-            time.sleep(10)
+            self.driver.implicitly_wait(10)
             if self.load_pages == 0:
                 self.actions.move_to_element(self.load_more_button)
                 self.load_more_button.click()
-                time.sleep(10)
+                self.driver.implicitly_wait(10)
                 self.load_pages +=1
             elif self.load_pages == 5:
                 time.sleep(15)
                 self.get_product_links()
             else:
-                time.sleep(10)
+                self.driver.implicitly_wait(10)
                 self.actions.move_to_element(self.load_more_button)
                 self.load_more_button.click()
-                time.sleepr(5)
+                self.driver.implicitly_wait(5)
 
 
     def get_product_data(self):
         self.num_clothing_items = len(self.shop_link_list)
         for i in range(self.num_clothing_items):
             self.full_item_list['image'].append(self.imagesrc_list[i])
-            time.sleep(10)
+            self.driver.implicitly_wait(10)
             self.driver.get(self.shop_link_list[i])
-            
             try:
                 self.driver.implicitly_wait(10)
                 self.popup = self.driver.find_element_by_xpath('//*[@id="att_lightbox_close"]')
@@ -80,7 +88,7 @@ class Scraper():
             except (ElementNotInteractableException, NoSuchElementException):
                 pass
             try:
-                time.sleep(10)
+                self.driver.implicitly_wait(10)
                 self.show_more_button = self.driver.find_element_by_xpath('//a[@class="show"]') 
                 self.actions.move_to_element(self.show_more_button)
                 self.show_more_button.click()
@@ -162,7 +170,3 @@ class Scraper():
 
 new_Scraper_ASOS= Scraper()
 new_Scraper_ASOS.scrape_website() 
-
-
-            
-# %%
