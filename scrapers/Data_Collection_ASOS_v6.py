@@ -11,11 +11,13 @@ from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import ElementNotInteractableException
 import urllib.request
+from urllib.error import ContentTooShortError
 from tqdm import tqdm
 import pandas as pd
 import json
 import uuid
 import os
+from bs4 import BeautifulSoup
 from os.path import exists
 import time
 
@@ -52,76 +54,8 @@ class Scraper():
         self.driver.implicitly_wait(10)
          
         if self.driver.current_url != url_1  and self.driver.current_url != url_2 :
-            self.actions.move_to_element(sales_button).click_and_hold().perform()
-            self.driver.implicitly_wait(10)
-            view_all_button.click()
-            self.driver.implicitly_wait(10)
- 
-    # Clicks the accept cookies button on the selenium driver
-    def load_and_accept_cookies(self):
-        self.driver.implicitly_wait(10)
-        accept_cookies_button = WebDriverWait(self.driver, self.delay).until(EC.presence_of_element_located((By.XPATH,'//*[@id="onetrust-accept-btn-handler"]')))
-        self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True' );});",accept_cookies_button)
-        accept_cookies_button.click()
-        time.sleep(2)
-        self.unit_Test_Cookies = accept_cookies_button.get_attribute("automationTrack")
-        return self.unit_Test_Cookies
-   
-
-    # Collects the links on all the loaded products and saved to list
-    def get_product_links(self):
-        time.sleep(5)
-        self.clothing_container = self.driver.find_element_by_xpath('//div[@class="_3pQmLlY"]')
-        self.clothing_section = self.clothing_container.find_elements_by_xpath('./section')
-        for section in self.clothing_section:
-            article = section.find_elements_by_xpath('./article')
-            time.sleep(5)
-            for articles in article:
-                a_tag = articles.find_element_by_tag_name('a')
-                self.link = a_tag.get_attribute('href')
-                self.shop_link_list.append(self.link)
-        
-        # Confirms the necessary links have been collected       
-        print(f'There are {len(self.shop_link_list)} in this link list')
-        return self.shop_link_list
-
-    # Selects the 'load more' button of the sale website to load more products
-    def load_more_products(self):
-        # n_pages was used to allow user to select later the number of pages they want to load
-      
-        while self.load_pages != self.n_pages:
-            self.driver.implicitly_wait(10)
-            self.load_more_button = self.driver.find_element_by_xpath('//a[@data-auto-id = "loadMoreProducts"]')
-            self.actions.move_to_element(self.load_more_button)
-            self.load_more_button.click()
-            self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True');});",self.load_more_button)
-            self.unit_Test_Load_1 = self.load_more_button.get_attribute("automationTrack")
-            self.driver.implicitly_wait(10)
-            self.load_pages +=1
-
-        if self.load_pages == self.n_pages:
-            self.unit_loaded_pages = True
-                 
-        return  self.unit_loaded_pages, self.unit_Test_Load_1, self.n_pages, self.load_pages
-
-
-    def nav_to_sale_pg(self):
-        self.driver.maximize_window()
-        time.sleep(2)
-        sales_button = self.driver.find_element_by_xpath('//button[@data-id="57242f2c-d207-471c-95b1-31d6839df360"]')
-        view_all_button = self.driver.find_element_by_xpath('//a[@class="_1cjL45H _2Y7IAa_ CLdGn9X _1XjY6Zd _1zz7j1l"]')
-        self.driver.implicitly_wait(10)
-        self.actions.move_to_element(sales_button).click_and_hold().perform()
-        self.driver.implicitly_wait(10)
-        view_all_button.click()
-        self.driver.implicitly_wait(10)
-         
-        if self.driver.current_url != url_1  and self.driver.current_url != url_2 :
-            self.actions.move_to_element(sales_button).click_and_hold().perform()
-            time.sleep(1)
-            view_all_button.click()
-            self.driver.implicitly_wait(10)
-            
+            sales_banner = self.driver.find_element_by_xpath('//a[@class="hero__muLink"]')
+            self.actions.move_to_element(sales_banner).click()
 
        
 
@@ -146,8 +80,8 @@ class Scraper():
             time.sleep(5)
             for articles in article:
                 a_tag = articles.find_element_by_tag_name('a')
-                self.link = a_tag.get_attribute('href')
-                self.shop_link_list.append(self.link)
+                link = a_tag.get_attribute('href')
+                self.shop_link_list.append(link)
         
         # Confirms the necessary links have been collected       
         print(f'There are {len(self.shop_link_list)} in this link list')
@@ -175,13 +109,12 @@ class Scraper():
 
 
     # Collects the data from the each of the collected links(product code, sale price etc.)
-       # Collects the data from the each of the collected links(product code, sale price etc.)
     def get_product_data(self):
         self.num_clothing_items = len(self.shop_link_list)
         for i in tqdm(range(self.num_clothing_items), 'Collecting Data from Links'):
             self.driver.implicitly_wait(10)
             self.driver.get(self.shop_link_list[i])
-            time.sleep(1)
+            time.sleep(5)
 
             # Selects the 'X" on the 'student discount' popup
             try:
@@ -205,22 +138,19 @@ class Scraper():
             try:
                 self.product_id = self.driver.find_element_by_xpath('//div[@class="product-code"]')
                 self.product_id_num =self.product_id.find_element_by_xpath('./p').text
+                if self.product_id_num == 'None':
+                    self.product_id_num = str(uuid.uuid4())
                 self.full_item_list['product_id'].append(self.product_id_num)
                 self.full_product_id.append(self.product_id_num)
             except NoSuchElementException:
-                self.product_id_num = (str(uuid.uuid4())[:9].replace("-",""))
-                self.full_item_list['product_id'].append(self.product_id_num)
-                self.full_product_id.append(self.product_id_num)
-           
+                self.full_item_list['product_id'].append('None')
 
             # Collects the image source for each of the product to download in get_images() function
             try:
-                img = self.driver.find_element_by_xpath('//div[@class="image-container zoomable"]')
-                image = img.find_element_by_xpath('./img')
+                image = self.driver.find_element_by_xpath('//img[@class="gallery-image"]')
                 self.image_src = image.get_attribute('src')
                 self.full_item_list['image'].append(self.image_src)
                 self.imagesrc_list.append(self.image_src)
-                
 
             except NoSuchElementException:
                 self.full_item_list['image'].append('None')
@@ -241,7 +171,7 @@ class Scraper():
                 #Some of the website use the RRP tag and other used a previous_price tag
                 if self.previous_price == '':
                     self.previous_price = self.driver.find_element_by_xpath(('//span[@data-id ="previous-price"]')).text.strip()
-                    self.previous_price = self.previous_price.replace('Was', '')
+                    self.actionsprevious_price = self.previous_price.replace('Was', '')
                 self.full_item_list['previous_price'].append(self.previous_price)
             except NoSuchElementException:
                 self.full_item_list['previous_price'].append('None')
@@ -249,10 +179,10 @@ class Scraper():
             # Collects the sale price of each of the products
             try:
                 self.sale_price = self.driver.find_element_by_xpath('//span[@data-id="current-price"]').text.strip()
-                self.sale_price_clean = self.sale_price.replace("Now", '')
-                self.full_item_list['sale_price'].append(self.sale_price_clean)
+                self.sale_price = self.sale_price.replace("Now", '')
+                self.full_item_list['sale_price'].append(self.sale_price)
                 if self.sale_price == '':
-                    self.full_item_list['sale_price'].append('Item is not on sale')
+                     self.full_item_list['sale_price'].append('Item is not on sale')
             except NoSuchElementException:
                 self.full_item_list['sale_price'].append('None')
             
@@ -267,12 +197,12 @@ class Scraper():
 
             # Collects the color of the items. Some have multiple colors
             try:
-                self.colour= self.driver.find_element_by_xpath('//span[@class="product-colour"]').text.strip()
+                self.colour = self.driver.find_element_by_xpath('//span[@class="product-colour"]').text.strip()
                 
                 # If there are multiple colors instead of sizes then they are accounted for below
                 if self.colour == '':
                     self.colour = self.driver.find_element_by_xpath('//div[@data-test-id="colour-size-select"]').text.strip()
-                    self.colour= self.colour.replace("Please select from", "")
+                    self.colour = self.colour.replace("Please select from", "")
                     self.colour = self.colour.replace("colors", 'colors:')
                 self.full_item_list['color'].append(self.colour)
             except NoSuchElementException:
@@ -280,10 +210,10 @@ class Scraper():
 
             # Collects product description for each of the product
             try:
-                self.description = self.driver.find_element_by_xpath('//div[@class = "product-description"]').text.replace("PRODUCT DETAILS\n", "")
-                self.full_item_list['product_details'].append(self.description)
+                description = self.driver.find_element_by_xpath('//div[@class = "product-description"]').text.strip()
+                self.ab_description = description.replace("PRODUCT DETAILS", "")
+                self.full_item_list['product_details'].append(self.ab_description)
             except NoSuchElementException:
-                self.description = "None"
                 self.full_item_list['product_details'].append('None')
             
             # Collects the sizes for each of the products
@@ -301,17 +231,13 @@ class Scraper():
     
             # Added to organize each item by their respective product id
             
-            self.organized_data  = {self.product_id_num:{'name':self.product_name, 'image':self.image_src, 'previous_price':self.previous_price, 'sale price':self.sale_price_clean,'sale_percentage':self.sale_percentage, 'color':self.colour, 'description':self.description, 'sizes':self.sizes}}
+            self.organized_data  = {self.product_id_num:{'name':self.product_name, 'image':self.image_src, 'previous_price':self.previous_price, 'sale price':self.sale_price,'sale_percentage':self.sale_percentage, 'color':self.colour, 'description':self.ab_description, 'sizes':self.sizes}}
             self.full_product_data.append(self.organized_data)
-        return self.full_item_list, self.full_product_data, self.full_product_id
+        return self.full_item_list, self.full_product_data
     
 
-  
     # Saves the data to either a json file or a pd Dataframe/csv for later    
     def save_data(self):
-        if not os.path.exists('ASOS_data'):
-                os.makedirs('ASOS_data')
-
         index = ['product_id','product_name', 'image', 'previous_price', 'sale_price', 'sale_percentage' 'color', 'product_details', 'sizes']
         
         
@@ -326,9 +252,12 @@ class Scraper():
         df1.to_csv (r'ASOS_data/ASOS_Women_Data_csv', index = index, header=True)
         
         df2 = pd.DataFrame.from_dict(self.full_product_data) 
-        df2.to_csv (r'ASOS_data/ASOS_Women__Org_Data_csv', index = self.full_product_id)
+        df2.to_csv (r'ASOS_data/ASOS_Women_Org_Data_csv')
 
-     
+        if os.path.exists('ASOS_data/ASOS_Women_Data_csv') and os.path.exists('ASOS_data/ASOS_Women_Org_data'):
+            self.saving_data = True
+            return self.saving_data
+    
     # Will download each of the images from their respective image sources for later
     def get_images(self):
         if not os.path.exists('ASOS_data/images'):
@@ -343,14 +272,14 @@ class Scraper():
             if os.path.exists(f"ASOS_data/images/ASOS_image_{id}.jpg"):
                 self.test_images.append(True)
             else:
-                self.test_images.append(False)
-        return self.test_images
-        
+                self.test_image.append(False)
+        print(len(self.test_images))
                 
 
     def quit_scraper(self):
         self.driver.quit()
         
+
     # Final Function that calls all the functions above in the necessary order    
     def scrape_website(self):
         self.load_and_accept_cookies()
@@ -366,8 +295,6 @@ ASOS.scrape_website()
 
 
 
-
-
 # Begins the scraping process 
 if __name__ == "__main__": 
     ASOS = Scraper() 
@@ -375,3 +302,4 @@ if __name__ == "__main__":
 
 
 # %%
+
