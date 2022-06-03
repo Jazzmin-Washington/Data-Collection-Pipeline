@@ -171,3 +171,4 @@ class Scraper():
 
 new_Scraper_ASOS= Scraper()
 new_Scraper_ASOS.scrape_website() 
+
