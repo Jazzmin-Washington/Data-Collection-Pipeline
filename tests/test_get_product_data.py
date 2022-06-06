@@ -10,59 +10,51 @@ from unittest import TestCase
 from scrapers.Data_Collection_ASOS_small_batch_for_testing import ASOS
 
 
-class TestSaveData(unittest.TestCase):
+class TestGetProductData(unittest.TestCase):
 
-    def setUpClass():
-        ASOS.save_data()
+    def setUpClass(self):
+        ASOS.load_and_accept_cookies()
+        ASOS.nav_to_sale_pg()
+        ASOS.get_product_links()
+        ASOS.get_product_data()
     
+    def test_link_url(self):
+        for i in range(5):
+            ASOS.driver.get(ASOS.shop_link[i])
+            expected = ASOS.shop_link_list[i]
+            actual = ASOS.driver.current_url
+            self.assertEqual(expected, actual)
 
-    def test_saved_json_file_dict(self):
-        f = open ('/scrapers/ASOS_data/ASOS_Women_data.json', "r")
-  
-        # Reading from file
-        data = json.load(f)
-        print(data)
-  
-    # Iterating through the json list
+            try:
+                ASOS.popup.click()
+            except (ElementNotInteractableException, NoSuchElementException):
+                pass
 
-        for i in range(len(data)):
-            self.assertTrue(data['product_id'][i] == ASOS.full_item_list['product_id'][i], 'Product Code does not match saved data file')
-            self.assertTrue(data['sale_price'][i] == ASOS.full_item_list['sale_price'][i], 'Sale Price does not match saved data file') 
-            self.assertTrue(data['product_name'][i] == ASOS.full_item_list['product_name'][i], 'Product Name does not match saved data file')
+            ASOS.actions.move_to_element(self.show_more_button).click()
 
-        f.close()
-    
-    def test_saved_json_file_org_dict(self):
-        fp = open ('scrapers/ASOS_data/ASOS_Women_Org_data.json', "r")
-  
-        # Reading from file
-        org_data = json.load(fp)
-        
-    # Iterating through the json d
-    # ict
-       
-        for i in range(len(org_data)):
-            self.assertTrue(org_data[i]['sizes'] == ASOS.full_product_data[i]['sizes'], "Product Code does not match saved data")
-            self.assertTrue(org_data[i]['color'] == ASOS.full_product_data[i]('color'), "Color data does not match saved data")
-            self.asserTrue(org_data[i]['sale_price'] == ASOS.full_product_data[i]['sale_price'], "Sale price does not match saved data")
+            try:
+                expected_2 =ASOS.product_id.find_element_by_xpath('./p').text
+                actual_2 = ASOS.full_item_list['product_id'][i]
+                self.assertEqual(expected_2, actual_2)
+            except NoSuchElementException or AssertionError:
+                print(f'Product Id did not match for link number {[i]}')
+            
+            
+            try: 
+                actual_3 = ASOS.driver.find_element_by_xpath('/html/body/div[1]/div/main/div[3]/section[1]/div/div[2]/div[2]/div[1]/div[1]/div[1]/span[2]/span[4]/span[1]').text.replace("Now", '')
+                expected_3 = ASOS.full_item_list['sale_price'][i]
+                self.assertEqual(expected_3, actual_3)
+            except NoSuchElementException or AssertionError:
+                print(f'Sale Price did not match for link number {[i]}')
+                
 
-        fp.close() 
-    
-    def test_csv_methods(self):
-        df1 = pd.read_csv(r'scrapers/ASOS_data/ASOS_Women_Data.csv')
-        dict_1 = df1.to_dict()
-
-        self.assertDictEqual(ASOS.full_item_list, dict_1, 'CSV file was not able to be converted to a dictionary')
-        
-
-    def test_csv_and_json_saved(self):
-         self.assertTrue(ASOS.saving_data == True, 'Both file types were not successfully saved') 
-
-    def test_remove_tempfile(self):
-        shutil.rmtree('ASOS_data')
-        if not os.path.exists('ASOS_data'):
-            assertion = True
-        self.assertTrue(assertion == True, 'All testing files were not removed')
+            try: 
+                actual_4 = ASOS.driver.find_element_by_xpath('/html/body/div[1]/div/main/div[3]/section[2]/div/div/div/div[1]/div').text.replace("PRODUCT DETAILS\n", "")
+                expected_4 = ASOS.full_item_list['product_details'][i]
+                self.assertIn(actual_4, expected_4)
+            except NoSuchElementException or AssertionError:
+                print(f'Description did not match for link number {[i]}')
+            
 
     def tearDownClass(self): 
        ASOS.driver.quit()
@@ -70,6 +62,10 @@ class TestSaveData(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()   
+    
+    
+# %%
+
     
     
 # %%
