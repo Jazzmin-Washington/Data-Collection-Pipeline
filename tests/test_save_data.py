@@ -29,30 +29,28 @@ class TestSaveData(unittest.TestCase):
   
         # Reading from file
         data = json.load(f)
-        print(data)
   
     # Iterating through the json list
 
-        for i in range(len(data)):
-            print(data['product_id'][i], ASOS.full_item_list['product_id'][i] )
-            self.assertTrue(data['product_id'][i] == ASOS.full_item_list['product_id'][i], 'Product Code does not match saved data file')
-            self.assertTrue(data['sale_price'][i] == ASOS.full_item_list['sale_price'][i], 'Sale Price does not match saved data file') 
-            self.assertTrue(data['product_name'][i] == ASOS.full_item_list['product_name'][i], 'Product Name does not match saved data file')
+        for i in range(3):
+        
+            self.assertEqual(data['product_id'][i], ASOS.full_item_list['product_id'][i], 'Product Code does not match saved data file')
+            self.assertEqual(data['sale_price'][i], ASOS.full_item_list['sale_price'][i], 'Sale Price does not match saved data file') 
+            self.assertEqual(data['product_name'][i],  ASOS.full_item_list['product_name'][i], 'Product Name does not match saved data file')
 
-            self.assertTrue(data['sizes'][i], ASOS.full_item_list['sizes'][i], "Sizes does not match saved data")
-            self.assertTrue(data['color'][i], ASOS.full_product_data['color'][i], "Color data does not match saved data")
-            self.asserTrue(data['sale_price'][i], ASOS.full_item_list['sale_price'][i], "Sale price does not match saved data")
+            self.assertEqual(data['sizes'][i], ASOS.full_item_list['sizes'][i], "Sizes does not match saved data")
+            self.assertEqual(data['color'][i], ASOS.full_item_list['color'][i], "Color data does not match saved data")
+            self.assertEqual(data['sale_price'][i], ASOS.full_item_list['sale_price'][i], "Sale price does not match saved data")
 
-  
+        f.close()
     
     def test_csv_methods(self):
 
         self.path_3 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/ASOS_data/ASOS_Women_Data.csv'
-        df1 = pd.read_csv(f'{self.path_3}')
-        dict_1 = df1.to_dict()
-        print(dict_1)
+        df1 = pd.read_csv(f'{self.path_3}', sep=',', header=0, index_col = 0).to_dict('list')
+        print(df1)
 
-        self.assertDictEqual(ASOS.full_item_list, dict_1, 'CSV file was not able to be converted to a dictionary')
+        self.assertDictEqual(ASOS.full_item_list, df1, 'CSV file was not able to be converted to a dictionary')
         
 
     def test_csv_and_json_saved(self):
