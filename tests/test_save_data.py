@@ -15,11 +15,16 @@ from scrapers.Data_Collection_ASOS_small_batch_for_testing import ASOS
 class TestSaveData(unittest.TestCase):
 
     def setUpClass():
+        ASOS.load_and_accept_cookies()
+        ASOS.nav_to_sale_pg()
+        ASOS.get_product_links()
+        ASOS.get_product_data()
         ASOS.save_data()
     
 
     def test_saved_json_file_dict(self):
-        f = open ('/scrapers/ASOS_data/ASOS_Women_data.json', "r")
+        self.path_1 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/scrapers/ASOS_data/ASOS_Women_data.json'
+        f = open (self.path_1, "r")
   
         # Reading from file
         data = json.load(f)
@@ -35,7 +40,8 @@ class TestSaveData(unittest.TestCase):
         f.close()
     
     def test_saved_json_file_org_dict(self):
-        fp = open ('scrapers/ASOS_data/ASOS_Women_Org_data.json', "r")
+        self.path_2 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/scrapers/ASOS_data/ASOS_Women_Org_data.json'
+        fp = open (self.path_2, "r")
   
         # Reading from file
         org_data = json.load(fp)
@@ -51,7 +57,9 @@ class TestSaveData(unittest.TestCase):
         fp.close() 
     
     def test_csv_methods(self):
-        df1 = pd.read_csv(r'scrapers/ASOS_data/ASOS_Women_Data.csv')
+
+        self.path_3 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/scrapers/ASOS_data/ASOS_Women_Data.csv'
+        df1 = pd.read_csv(f'{self.path_3}')
         dict_1 = df1.to_dict()
 
         self.assertDictEqual(ASOS.full_item_list, dict_1, 'CSV file was not able to be converted to a dictionary')
@@ -71,5 +79,3 @@ class TestSaveData(unittest.TestCase):
         
 if __name__ == '__main__':
     unittest.main()
-
-# %%
