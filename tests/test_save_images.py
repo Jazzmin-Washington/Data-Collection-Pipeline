@@ -9,7 +9,7 @@ from unittest import TestCase
 from scrapers.Data_Collection_ASOS_small_batch_for_testing import ASOS
 
 class TestSaveImages(unittest.TestCase):
-    def setUpClass(self):
+    def setUpClass():
         ASOS.get_images()
   
     def test_image_sources(self):
@@ -21,15 +21,17 @@ class TestSaveImages(unittest.TestCase):
             self.assertTrue(image == True, 'Each image was not downloaded successfully')
 
     def test_remove_tempfile(self):
-        if os.path.exists('ASOS_data/image'):
-            shutil.rmtree('ASOS_data/image')
+        if os.path.exists('/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/scrapers/ASOS_data/image'):
+            shutil.rmtree('/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/scrapers/ASOS_data/image')
+            
+        else:
             assertion = True
         self.assertTrue(assertion == True)
 
     
-    def tearDownClass(self):
+    def tearDownClass():
         ASOS.driver.quit()
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(
         
