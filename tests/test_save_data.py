@@ -32,7 +32,7 @@ class TestSaveData(unittest.TestCase):
   
     # Iterating through the json list
 
-        for i in range(3):
+        for i in range(5):
         
             self.assertEqual(data['product_id'][i], ASOS.full_item_list['product_id'][i], 'Product Code does not match saved data file')
             self.assertEqual(data['sale_price'][i], ASOS.full_item_list['sale_price'][i], 'Sale Price does not match saved data file') 
