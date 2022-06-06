@@ -39,9 +39,9 @@ class TestSaveData(unittest.TestCase):
             self.assertTrue(data['sale_price'][i] == ASOS.full_item_list['sale_price'][i], 'Sale Price does not match saved data file') 
             self.assertTrue(data['product_name'][i] == ASOS.full_item_list['product_name'][i], 'Product Name does not match saved data file')
 
-            self.assertTrue(data['sizes'], ASOS.full_item_list['sizes'][i], "Sizes does not match saved data")
-            self.assertTrue(org_data[i]['color'], ASOS.full_product_data['color'][i], "Color data does not match saved data")
-            self.asserTrue(org_data[i]['sale_price'], ASOS.full_item_list['sale_price'][i], "Sale price does not match saved data")
+            self.assertTrue(data['sizes'][i], ASOS.full_item_list['sizes'][i], "Sizes does not match saved data")
+            self.assertTrue(data['color'][i], ASOS.full_product_data['color'][i], "Color data does not match saved data")
+            self.asserTrue(data['sale_price'][i], ASOS.full_item_list['sale_price'][i], "Sale price does not match saved data")
 
   
     
@@ -52,7 +52,7 @@ class TestSaveData(unittest.TestCase):
         dict_1 = df1.to_dict()
         print(dict_1)
 
-        self.assertDictEquals(ASOS.full_item_list, dict_1, 'CSV file was not able to be converted to a dictionary')
+        self.assertDictEqual(ASOS.full_item_list, dict_1, 'CSV file was not able to be converted to a dictionary')
         
 
     def test_csv_and_json_saved(self):
