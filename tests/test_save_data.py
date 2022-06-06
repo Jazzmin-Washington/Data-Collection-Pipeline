@@ -21,9 +21,10 @@ class TestSaveData(unittest.TestCase):
         ASOS.get_product_data()
         ASOS.save_data()
     
+    
 
     def test_saved_json_file_dict(self):
-        self.path_1 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/scrapers/ASOS_data/ASOS_Women_data.json'
+        self.path_1 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/ASOS_data/ASOS_Women_data.json'
         f = open (self.path_1, "r")
   
         # Reading from file
@@ -33,46 +34,31 @@ class TestSaveData(unittest.TestCase):
     # Iterating through the json list
 
         for i in range(len(data)):
+            print(data['product_id'][i], ASOS.full_item_list['product_id'][i] )
             self.assertTrue(data['product_id'][i] == ASOS.full_item_list['product_id'][i], 'Product Code does not match saved data file')
             self.assertTrue(data['sale_price'][i] == ASOS.full_item_list['sale_price'][i], 'Sale Price does not match saved data file') 
             self.assertTrue(data['product_name'][i] == ASOS.full_item_list['product_name'][i], 'Product Name does not match saved data file')
 
-        f.close()
-    
-    def test_saved_json_file_org_dict(self):
-        self.path_2 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/scrapers/ASOS_data/ASOS_Women_Org_data.json'
-        fp = open (self.path_2, "r")
-  
-        # Reading from file
-        org_data = json.load(fp)
-        
-    # Iterating through the json d
-    # ict
-       
-        for i in range(len(org_data)):
-            self.assertTrue(org_data[i]['sizes'] == ASOS.full_product_data[i]['sizes'], "Product Code does not match saved data")
-            self.assertTrue(org_data[i]['color'] == ASOS.full_product_data[i]('color'), "Color data does not match saved data")
-            self.asserTrue(org_data[i]['sale_price'] == ASOS.full_product_data[i]['sale_price'], "Sale price does not match saved data")
+            self.assertTrue(data['sizes'], ASOS.full_item_list['sizes'][i], "Sizes does not match saved data")
+            self.assertTrue(org_data[i]['color'], ASOS.full_product_data['color'][i], "Color data does not match saved data")
+            self.asserTrue(org_data[i]['sale_price'], ASOS.full_item_list['sale_price'][i], "Sale price does not match saved data")
 
-        fp.close() 
+  
     
     def test_csv_methods(self):
 
-        self.path_3 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/scrapers/ASOS_data/ASOS_Women_Data.csv'
+        self.path_3 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/ASOS_data/ASOS_Women_Data.csv'
         df1 = pd.read_csv(f'{self.path_3}')
         dict_1 = df1.to_dict()
+        print(dict_1)
 
-        self.assertDictEqual(ASOS.full_item_list, dict_1, 'CSV file was not able to be converted to a dictionary')
+        self.assertDictEquals(ASOS.full_item_list, dict_1, 'CSV file was not able to be converted to a dictionary')
         
 
     def test_csv_and_json_saved(self):
          self.assertTrue(ASOS.saving_data == True, 'Both file types were not successfully saved') 
 
-    def test_remove_tempfile(self):
-        shutil.rmtree('ASOS_data')
-        if not os.path.exists('ASOS_data'):
-            assertion = True
-        self.assertTrue(assertion == True, 'All testing files were not removed')
+    
 
     def tearDownClass(): 
        ASOS.driver.quit()
