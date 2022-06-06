@@ -20,7 +20,7 @@ class TestGetProductData(unittest.TestCase):
     
     def test_link_url(self):
         for i in range(5):
-            ASOS.driver.get(ASOS.shop_link[i])
+            ASOS.driver.get(ASOS.shop_link_list[i])
             expected = ASOS.shop_link_list[i]
             actual = ASOS.driver.current_url
             self.assertEqual(expected, actual)
