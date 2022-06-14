@@ -5,10 +5,11 @@ import unittest
 from unittest import TestCase
 from scrapers.Data_Collection_ASOS_small_batch_for_testing import ASOS
 
-class TestLoadMoreProducts(unittest.TestCase):
+class TestFunction_3(unittest.TestCase):
     @classmethod 
     def setUpClass(self):
-        ASOS.load_more_products()
+      new_scraper = ASOS
+      ASOS._load_more_products()
         
 # Unit Test 1: Test whether the load_button works
     def test_load_more_button(self):
@@ -24,12 +25,9 @@ class TestLoadMoreProducts(unittest.TestCase):
         
     @classmethod
     def tearDownClass(self):
-      ASOS.driver.quit()
-  
-
+      print('\n Testing load page complete')
     
-    
-
 if __name__ == '__main__':
-  unittest.main()
+    unittest.main()
+    
 # %%
