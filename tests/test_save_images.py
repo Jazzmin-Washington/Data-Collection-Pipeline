@@ -8,13 +8,10 @@ import shutil
 from unittest import TestCase
 from scrapers.Data_Collection_ASOS_small_batch_for_testing import ASOS
 
-class TestSaveImages(unittest.TestCase):
+class TestFunction_7(unittest.TestCase):
     def setUpClass():
-        ASOS.load_and_accept_cookies()
-        ASOS.nav_to_sale_pg()
-        ASOS.get_product_links()
-        ASOS.get_product_data()
-        ASOS.get_images()
+        new_scraper = ASOS
+        ASOS._get_images()
   
     def test_image_sources(self):
         for image in range(len(ASOS.imagesrc_list)):
@@ -24,15 +21,6 @@ class TestSaveImages(unittest.TestCase):
         for i in ASOS.test_images:
             self.assertTrue(ASOS.test_images[i] == True, 'Each image was not downloaded successfully')
 
-    def test_remove_tempfile(self):
-        if os.path.exists('/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/ASOS_data/image'):
-            shutil.rmtree('/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/ASOS_data/image')
-            
-        else:
-            assertion = True
-        self.assertTrue(assertion == True)
-
-    
     def tearDownClass():
         ASOS.driver.quit()
 
