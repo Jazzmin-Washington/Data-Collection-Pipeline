@@ -1,5 +1,4 @@
 #%%
-#%%
 # ASOS Website
 import selenium
 import pandas as pd
@@ -30,7 +29,8 @@ url_2 = 'https://www.asos.com/women/sale/cat/?cid=7046&nlid=ww|sale|shop+sale+by
 
 
 class Scraper():
-    #Variables that were initialised including necessary lists, drivers and dictionaries 
+    ''' Variables that were initialised including necessary lists, drivers and dictionaries
+        These variables are used multiple times throughout several functions''' 
     def __init__(self):
         self.driver = Chrome('./chromedriver')        
         self.driver.get(url)
@@ -52,7 +52,26 @@ class Scraper():
         self.n_pages = 5
         self.actions = ActionChains(self.driver)
         self.delay = 10
-    
+
+       
+
+    ''' The load_and accept_cookies function clicks the accept cookies button 
+        on the webpage using the selenium driver.
+        
+        An event listener was  added for unit testing '''
+
+    def _load_and_accept_cookies(self):
+        self.driver.implicitly_wait(10)
+        accept_cookies_button = WebDriverWait(self.driver, self.delay).until(EC.presence_of_element_located((By.XPATH,'//*[@id="onetrust-accept-btn-handler"]')))
+        self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True' );});",accept_cookies_button)
+        accept_cookies_button.click()
+        time.sleep(2)
+        self.unit_Test_Cookies = accept_cookies_button.get_attribute("automationTrack")
+        return self.unit_Test_Cookies
+
+    ''' The nav_to_sale function is used to navigate to the women's sale webpage from the ASOS homepage
+        An event listener was added for unit testing. ''' 
+
     def _nav_to_sale_pg(self):
         self.driver.maximize_window()
         time.sleep(2)
@@ -64,45 +83,15 @@ class Scraper():
         self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True' );});", view_all_button)
         view_all_button.click()
         self.driver.implicitly_wait(10)
-       
-         
-
-
-       
-
-    # Clicks the accept cookies button on the selenium driver
-    def _load_and_accept_cookies(self):
-        self.driver.implicitly_wait(10)
-        accept_cookies_button = WebDriverWait(self.driver, self.delay).until(EC.presence_of_element_located((By.XPATH,'//*[@id="onetrust-accept-btn-handler"]')))
-        self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True' );});",accept_cookies_button)
-        accept_cookies_button.click()
-        time.sleep(2)
-        self.unit_Test_Cookies = accept_cookies_button.get_attribute("automationTrack")
-        return self.unit_Test_Cookies
    
+    ''' The load_more_products function selects the 'load more' button on the sale website 
+        to load more products.
 
-    # Collects the links on all the loaded products and saved to list
-    def _get_product_links(self):
-        self.shop_link_list = []
-        time.sleep(3)
-        clothing_container = self.driver.find_element_by_xpath('//div[@class="_3pQmLlY"]')
-        clothing_section = clothing_container.find_elements_by_xpath('./section')
-        for section in clothing_section:
-            article = section.find_elements_by_xpath('./article')
-            time.sleep(3)
-            for articles in article:
-                a_tag = articles.find_element_by_tag_name('a')
-                link = a_tag.get_attribute('href')
-                self.shop_link_list.append(link)
-        
-        # Confirms the necessary links have been collected       
-        print(f'There are {len(self.shop_link_list)} in this link list')
-       
+        The 'self.n_pages' variable was added to allow user to select how many pages of product 
+        they would like to load'''
 
-    # Selects the 'load more' button of the sale website to load more products
     def _load_more_products(self):
-        # n_pages was used to allow user to select later the number of pages they want to load
-      
+        
         while self.load_pages != self.n_pages:
             self.driver.implicitly_wait(10)
             load_more_button = self.driver.find_element_by_xpath('//a[@data-auto-id = "loadMoreProducts"]')
@@ -119,9 +108,42 @@ class Scraper():
                  
         return self.unit_loaded_pages, self.unit_Test_Load_1, self.n_pages, self.load_pages
 
+    ''' The get_product_link function collects the links on the loaded products on the webpage and 
+        appends them to a list for use in later functions '''
+
+    def _get_product_links(self):
+        self.shop_link_list = []
+        time.sleep(3)
+        clothing_container = self.driver.find_element_by_xpath('//div[@class="_3pQmLlY"]')
+        clothing_section = clothing_container.find_elements_by_xpath('./section')
+        for section in clothing_section:
+            article = section.find_elements_by_xpath('./article')
+            time.sleep(3)
+            for articles in article:
+                a_tag = articles.find_element_by_tag_name('a')
+                link = a_tag.get_attribute('href')
+                self.shop_link_list.append(link)
+        
+        # Confirms the necessary links have been collected       
+        print(f'There are {len(self.shop_link_list)} links in this link list')
+       
 
 
-    # Collects the data from the each of the collected links(product code, sale price etc.)
+    ''' The get_product_data collects the data from the each of the collected links including
+        product code or uuid number if no product code/id is listed,
+        image source for the products,
+        name of the products,
+        previous listed price,
+        current sale price, 
+        percentage difference between previous and sale prices,
+        color of product,
+        sizes of products (if statements were added for non-clothing products)
+        and product description.
+        
+        
+        To display all information that was collected, a show_more_button and pop_up button variables
+        were also added'''
+
     def _get_product_data(self):
         num_clothing_items = len(self.shop_link_list)
         for i in tqdm(range(5), 'Collecting Data from Links'):
@@ -151,12 +173,12 @@ class Scraper():
             try:
                 product_id = self.driver.find_element_by_xpath('//div[@class="product-code"]')
                 product_id_num = product_id.find_element_by_xpath('./p').text
-                if product_id_num == 'None'or product_id_num == "":
-                    product_id_num = str(uuid.uuid4())
-                self.full_item_list['product_id'].append(product_id_num)
                 self.full_product_id.append(product_id_num)
+                self.full_item_list['product_id'].append(product_id_num)
             except NoSuchElementException:
-                self.full_item_list['product_id'].append('None')
+                product_id_num = str(uuid.uuid4())
+                product_id_num = product_id_num[:8]
+                self.full_item_list['product_id'].append(product_id_num)
 
             # Collects the image source for each of the product to download in get_images() function
             try:
@@ -202,9 +224,9 @@ class Scraper():
             # Collects the percentage difference between market and sale price of products
             try:
                 sale_percentage = self.driver.find_element_by_xpath('//span[@class="product-discount-percent"]').text.strip()
-                self.full_item_list['sale_percentage'].append(sale_percentage)
                 if sale_percentage == '':
                     self.full_item_list['sale_percentage'].append('Item not on sale')
+                self.full_item_list['sale_percentage'].append(sale_percentage)
             except NoSuchElementException:
                 self.full_item_list['sale_percentage'].append('None')
 
@@ -242,7 +264,7 @@ class Scraper():
             except NoSuchElementException:
                 self.full_item_list['sizes'].append('None')
     
-            # Added to organize each item by their respective product id
+            # Added to organize each item by their respective product id/uuid
             
             organized_data  = {product_id_num:
                     {'name':product_name, 
@@ -257,7 +279,9 @@ class Scraper():
         return self.full_item_list, self.full_product_data
     
 
-    # Saves the data to either a json file or a pd Dataframe/csv for later    
+    ''' For easy lookup and to prevent rescraping the website, the save_data function
+        saves the data to either a json file or a pd Dataframa/csv file for future usability'''
+
     def _save_data(self):
         index = ['product_id',
                 'product_name',
@@ -274,22 +298,28 @@ class Scraper():
         if not os.path.exists(f'{save_path}/ASOS_data'):
                 os.makedirs(f'{save_path}/ASOS_data')
 
-        with open('ASOS_data/ASOS_Women_data.json', 'w') as fp:
+        with open(f'{save_path}/ASOS_data/ASOS_Women_data.json', 'w+') as fp:
             json.dump(self.full_item_list, fp,  indent=4)
 
-        with open('ASOS_data/ASOS_Women_Org_data.json', 'w') as fp:
+        with open(f'{save_path}/ASOS_data/ASOS_Women_Org_data.json', 'w+') as fp:
             json.dump(self.full_product_data, fp,  indent=4)
                 
         
         df1 = pd.DataFrame.from_dict(self.full_item_list) 
-        df1.to_csv (r'ASOS_data/ASOS_Women_Data.csv', index = index, header=True)
+        df1.to_csv(r'/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/ASOS_data/ASOS_Women_Data.csv', 
+        index = index, header=True)
         
 
-        if os.path.exists('ASOS_data/ASOS_Women_Data.csv') and os.path.exists('ASOS_data/ASOS_Women_Org_data.json'):
+        if os.path.exists(f'{save_path}/ASOS_data/ASOS_Women_Data.csv') and os.path.exists(f'{save_path}/ASOS_data/ASOS_Women_Org_data.json'):
             self.saving_data = True
             return self.saving_data, save_path
+
     
-    # Will download each of the images from their respective image sources for later
+    ''' As images of products are likely to change, each of the collected image source were used to
+        download the images and saved locally for future reference. 
+
+        Each photo was saved using their unique product id or uuid '''
+
     def _get_images(self):
         save_path = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline'
         if not os.path.exists(f'{save_path}/ASOS_data/images'):
@@ -308,15 +338,18 @@ class Scraper():
                 self.test_image.append(False)
         
                 
-
+    ''' The quit_scraper function will close the scraper once the data is collected and saved.'''
     def _quit_scraper(self):
         self.driver.quit()
         
 
-    # Final Function that calls all the functions above in the necessary order    
+    ''' Final Function that calls all the functions above in the necessary order to ensure the scraper runs smoothly. All functions 
+        are private methods indicated by the '_' in the naming convention'''
+
     def scrape_website(self):
         self._load_and_accept_cookies()
         self._nav_to_sale_pg()
+        self._load_more_products()
         self._get_product_links()
         self._get_product_data()
         self._save_data()
@@ -324,7 +357,7 @@ class Scraper():
         self._quit_scraper()
 
 ASOS = Scraper()
-
 # Begins the scraping process 
 if __name__ == "__main__": 
     ASOS = Scraper() 
+    ASOS.scrape_website()
