@@ -12,17 +12,12 @@ from scrapers.Data_Collection_ASOS_small_batch_for_testing import ASOS
 
 
 
-class TestSaveData(unittest.TestCase):
+class TestFunction_6(unittest.TestCase):
 
     def setUpClass():
-        ASOS.load_and_accept_cookies()
-        ASOS.nav_to_sale_pg()
-        ASOS.get_product_links()
-        ASOS.get_product_data()
-        ASOS.save_data()
+        new_scraper = ASOS
+        ASOS._save_data()
     
-    
-
     def test_saved_json_file_dict(self):
         self.path_1 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/ASOS_data/ASOS_Women_data.json'
         f = open (self.path_1, "r")
@@ -37,7 +32,6 @@ class TestSaveData(unittest.TestCase):
             self.assertEqual(data['product_id'][i], ASOS.full_item_list['product_id'][i], 'Product Code does not match saved data file')
             self.assertEqual(data['sale_price'][i], ASOS.full_item_list['sale_price'][i], 'Sale Price does not match saved data file') 
             self.assertEqual(data['product_name'][i],  ASOS.full_item_list['product_name'][i], 'Product Name does not match saved data file')
-
             self.assertEqual(data['sizes'][i], ASOS.full_item_list['sizes'][i], "Sizes does not match saved data")
             self.assertEqual(data['color'][i], ASOS.full_item_list['color'][i], "Color data does not match saved data")
             self.assertEqual(data['sale_price'][i], ASOS.full_item_list['sale_price'][i], "Sale price does not match saved data")
@@ -48,7 +42,6 @@ class TestSaveData(unittest.TestCase):
 
         self.path_3 = '/home/jazz/Documents/AiCore_Projects/Data_Collection_Pipeline/Data-Collection-Pipeline/ASOS_data/ASOS_Women_Data.csv'
         df1 = pd.read_csv(f'{self.path_3}', sep=',', header=0, index_col = 0).to_dict('list')
-        print(df1)
 
         self.assertDictEqual(ASOS.full_item_list, df1, 'CSV file was not able to be converted to a dictionary')
         
@@ -56,10 +49,11 @@ class TestSaveData(unittest.TestCase):
     def test_csv_and_json_saved(self):
          self.assertTrue(ASOS.saving_data == True, 'Both file types were not successfully saved') 
 
-    
 
     def tearDownClass(): 
-       ASOS.driver.quit()
+       print('\n Product Data completed')
+      
         
 if __name__ == '__main__':
     unittest.main()
+
