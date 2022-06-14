@@ -3,14 +3,18 @@
 import selenium
 from selenium.webdriver import Chrome
 import unittest
+import time
 from unittest import TestCase
+import time
+from scrapers.Data_Collection_ASOS_small_batch_for_testing import ASOS
 
 
-class TestLoadAndAcceptCookies(unittest.TestCase):
+
+class TestFunction_1(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-      ASOS.driver.implicitly_wait(5)
-      ASOS.load_and_accept_cookies()
+      new_scraper = ASOS
+      ASOS._load_and_accept_cookies()
    
 # Unit Test 1: Test whether the load_and_accept_cookies_button_works
     def test_cookies(self):
@@ -18,7 +22,7 @@ class TestLoadAndAcceptCookies(unittest.TestCase):
   
     @classmethod
     def tearDownClass(self):
-      ASOS.driver.quit()
-      
-    
-# %%
+      print('\n Cookies have been accepted')
+
+if __name__ == '__main__':
+    unittest.main()
