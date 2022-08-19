@@ -178,7 +178,7 @@ ________________________________________________________________________________
       
  ![image](https://user-images.githubusercontent.com/102431019/185657948-89fb297f-1c05-4ae2-8edc-7eade3aec14b.png)
        
-   Pictured above is the files that were downloaded with the appropriate product code in the naming convention collected during unit testing
+   ##### Pictured above is the files that were downloaded with the appropriate product code in the naming convention collected during unit testing
    
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Milestone 4: Documentation and Testing (Complete)
@@ -200,21 +200,21 @@ ________________________________________________________________________________
 
 -Each record should have its own JSON file containing all information for that record and uploaded directly to S3 using boto3. This should include both the JSON and image data.To do this, `_s3_data_dump()` and `_s3_image_dump()` functions were created.
  
-Pictured Below: The correspoding code to save and upload the necessary files to a created s3 bucket. 
+##### Pictured Below: The correspoding code to save and upload the necessary files to a created s3 bucket. 
 ![image](https://user-images.githubusercontent.com/102431019/185658860-19ebc049-c54a-4316-a719-b9af42a4dccd.png)
 
 
-Pictured Below:This is an example of the uploaded files in the AWS S3 bucket including the uploaded images
+##### Pictured Below:This is an example of the uploaded files in the AWS S3 bucket including the uploaded images
 ![image](https://user-images.githubusercontent.com/102431019/185660696-de805b7d-2968-4596-a21c-8a0ce76c1e4c.png)
 
 
 - A free tier micro RDS database was created to allow for the data to be uploaded to a postgres SQL server. As the website is scraped consecutively, this will allow one to sort and query the collected data.
 
 ![image](https://user-images.githubusercontent.com/102431019/185659256-3d045ea4-8d6f-4560-9e60-211d38304942.png)
-Pictured Above: The corresponding code to upload the data to the Postgres SQL server via `sqlalchemy` and `psyopg2`
+##### Pictured Above: The corresponding code to upload the data to the Postgres SQL server via `sqlalchemy` and `psyopg2`
 
 ![image](https://user-images.githubusercontent.com/102431019/185661433-350ef350-5943-40b0-aba5-025384aa5ba6.png)
-Pictured Above: A picture of the working Postgres SQL server with an example of the collected data from the Men's Sale Website
+##### Pictured Above: A picture of the working Postgres SQL server with an example of the collected data from the Men's Sale Website
 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -361,18 +361,110 @@ Pictured Above: A picture of the working Postgres SQL server with an example of 
               if '.csv' in files or '.json' in files:
                   os.remove(f'{files}')
 
-   #### D) Uploading the appended files: The appended files were then uploaded using the previously shown `_s3_data_dump()` and `_s3_image_dump()` functions for AWS S3. The `_postgres_dump()' function was used to append the 'self.products' dataframe references in the `_save_data()` function because this dataframe had already been checked against the Postgres Database via `_previously_scraped()` function listed in A) in this section.
+   #### D) Uploading the appended files: The appended files were then uploaded using the previously shown `_s3_data_dump()` and `_s3_image_dump()` functions for AWS S3. The `_postgres_dump()` function was used to append the 'self.products' dataframe references in the `_save_data()` function because this dataframe had already been checked against the Postgres Database via `_previously_scraped()` function listed in A).
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Milestone 7: Making the Scraper User Friendly (Completed)
 
 - Several functions were added to allow users to interact with the scraping program including the ability to select:
-        - Whether to scrape the Men's or Women's ASOS Sale webpage
-        - How many products they would like to scrape
-        - To input their own AWS S3 and Postgres Database Information
-        - To append scraped data to their own S3 buckets and RDS Databases
+    - Whether to scrape the Men's or Women's ASOS Sale webpage
+    ![image](https://user-images.githubusercontent.com/102431019/185668993-90c9fe8c-5639-43fd-8859-96efd96bece3.png)
+
+    - How many products they would like to scrape
+    ![image](https://user-images.githubusercontent.com/102431019/185669187-1b964dd8-1876-465c-aa31-bfc332ccbdfd.png)
+
+    - Input their own AWS S3 and Postgres Database Information to append scraped data to their own S3 buckets and RDS Databases
+    ![image](https://user-images.githubusercontent.com/102431019/185669316-e90ad991-fa9d-40e5-b858-b8d30b4fd488.png)
+
+ - Pictured below: User friendly options were added using `argparse_prompt` and appear when running the program. 
+    - Defaults were set based on the AWS S3 and Postgres setting set up for this project. However, users can enter their own information as             pictured. 
+    - Both the Postgres SQL password and AWS_Secret_Access_Code were made secure and do not appear in the CLI. 
+  ![image](https://user-images.githubusercontent.com/102431019/185671045-2d32f09a-6d86-4823-8a1e-a507ad4bd373.png)
+     
+   - If a connection was not able to be made to either AWS S3 Bucket or Postgres Database then an error will be thrown, all entered data              including the passwords will be printed and the user will be asked to re-enter their credentials. An example of this is pictured below:
+   ![image](https://user-images.githubusercontent.com/102431019/185671464-cee87db5-9305-48fd-9e28-e7acbd6f3c99.png)
+
+
+#### It is important to note the interactive options were not included in the file `Updated_ASOS_Cron.py` because this file contains a `Scraper()` class specifically designed to run with cronjobs in which 25 products from both the Men and Women Sale webpages will be collected every Friday. 
+     
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
-## Milestone 8:Monitoring and Alerting (Not Completed)
+## Milestone 8:Monitoring and Alerting (In Progress(See ISSUE))
+
+ - In order to containerise the scraper program, the scraper program needed to be run in headless mode. This was completed by adding arguments to the `webdriver.ChromeOptions()` while running starting the driver. 
+    
+       def _start_driver(self):
+           chrome_options = Options()
+           options = webdriver.ChromeOptions()
+           options.add_argument("start-maximized") # open Browser in maximized mode
+           options.add_argument("disable-infobars")# disabling infobars
+           options.add_argument("--disable-extensions"); # disabling extensions
+           options.add_argument("--no-sandbox") 
+           options.add_argument("--headless")
+           options.add_argument("--disable-dev-shm-usage")
+           options.add_argument("--disable-setuid-sandbox") 
+           options.add_argument('--disable-gpu')      
+           options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
+           options.add_argument("window-size=1920,1080")
+           self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)  
+           self.driver.get(self.url)
+           self.actions = ActionChains(self.driver)
+           self.driver.implicitly_wait(10)
+
+ - Next, a Dockerfile was created to build a Docker Image to allow one to :
+    -  Choose a base image
+    -  Put everything required by the scraper within the container
+    -  Install any dependencies
+    -  Run the main Python file
+    -  
+ ##### Pictured Below: In the left window is the requirement.txt file which list all the required dependencies and on the right is the Dockerfile used to build the docker images.
+ ![image](https://user-images.githubusercontent.com/102431019/185673647-0343fba0-8932-438f-9cf0-01c26141a43c.png)
+
+ ##### Pictured Below: The docker images that were created and containerised. 
+ ![image](https://user-images.githubusercontent.com/102431019/185673941-98562e25-2a0d-4bde-83a3-0c352d41a27e.png)
+ 
+ ##### Pictured Below: These images were then pushed to DockerHub
+![image](https://user-images.githubusercontent.com/102431019/185675059-de43ee19-f1d8-4e95-9752-bcb5698cb2c7.png)
+
+
+- An SSH connection was then established to connect to an EC2 Instance. 
+    - A free tier EC2 instance was deployed through the AWS console
+    - Using SSH Client in VS Code, a configuration file was edited to include the EC2 Instance details
+    - Finally a connection was extablished through VS Code
+    
+- A `git clone` was then created within the SSH connection to copy the required files
+
+- `sudo apt update` and `sudo apt upgrade` was run to allow for Docker to added to the SSH Connection
+
+- `sudo apt install docker.io` was then used to install Docker 
+
+- Docker images were then pulled from DockerHub. 
+
+![image](https://user-images.githubusercontent.com/102431019/185676427-c7ea382c-8447-4197-ae9b-612cee24b3ec.png)
+##### Picturd Above: In the left-hand corner in the explorer under HOME[SSH: ASOS], we can see the files that were cloned from github and the SSH files in the ubuntu dropdown corresponding to an open SSH connection. In the terminal window, the first command indicates the presence of the required Docker Images and the second command shows the Images run smoothly.
+
+-The prometheus configuration file was then created and edited to allow one to observe metrics on the EC2 instance, the local machine and the docker containers (Pictured Below)
+![image](https://user-images.githubusercontent.com/102431019/185679796-9efb7b40-203f-4772-a107-93c99f8bbbf1.png)
+
+#### ISSUE : There was a problem getting the node explorer to work with my local machine but the other metrics were able to viewed successfully.
+![image](https://user-images.githubusercontent.com/102431019/185680504-bef58bd8-4fd1-4886-87e3-2c3ad225e3a7.png)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
-## Milestone 9:Setup CI/CD Pipeline for Docker Image (Not Completed)
+## Milestone 9:Setup CI/CD Pipeline for Docker Image (Completed)
+
+-The final step was to create GitHub Actions to push updated versions of the scraper to DockerHub by creating the necessary Secrets. 
+ -A GitHub action was created to be triggered on a push to the main branch of your repository.The action builds the Docker image and pushes it to my Dockerhub accoun (Pictured Below)
+ ![image](https://user-images.githubusercontent.com/102431019/185682475-056b50c9-cc54-4219-aef6-f7e5f40fb54f.png)
+
+ 
+-Cronjobs were then added to run the scraper every Friday at Midnight. The cronjobs stops and kill the container, as well as pulls the latest image from your Dockerhub account (Pictured Below).
+![image](https://user-images.githubusercontent.com/102431019/185682304-8f9c6c07-16f8-49e7-bfc4-99d87d205062.png)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+## Conclusions
+
+Positives: I gained an in depth experience using `Selenium Webdriver`, `Docker`, `GitHub Actions`, `Grafana`, `Prometheus`, `Postgres`, `AWS S3`, `AWS RDS` and `AWS EC2` to build a working Data Collection Pipeline. It was a rewarding experience allowing me to achieve a working knowledge of several important programs that are widely used within the Data Science/Data Engineering Industry. 
+
+Future Goals: I would like to build another Data Collection Pipeline based on my interest in the scientific field. An example would be to use the UniProt or RCSB Databases to build a Data Collection Pipeline for proteins involved in specific diseases as I think this could be useful and challenging. 
+
+Problem Solving: In terms of the programming, I would end the day with my scraper working and then try to run it a few days later but minor changes were made to the website resulting in having to make the necessary changes to the base code. Secondly, the hardest challenge was getting the scraper to run in both the Docker container and EC2 instance as many of the interactive options did not work originally. Using `argparse_prompt` eliminated some of the challenges I faced with the in-built `argparse` functions because I did not need to worry about calling the required flags within the Docker container. `argparse_prompt` did not need flags and would prompt the user independently. I also ran into problems with the `credential.json` and using .gitignore and .dockerignore to ensure my credentials would not be uploaded. There were times were the `credential.json` file was not recognized in the file structure but this was fixed by using the full PATH location. Finally, I ran into a problem using the interactive items of y scraper with cronjobs as it would throw an error so, a second file `Updated_ASOS_Cron.py` was created for this specific purpose of running the scraper in a cronjob. 
+ 
