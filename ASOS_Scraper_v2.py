@@ -213,7 +213,7 @@ class Scraper():
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-setuid-sandbox") 
         options.add_argument('--disable-gpu')      
-        options.add_argument("user-agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005 Safari/537.36'")
+        options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
         options.add_argument("window-size=1920,1080")
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)  
         self.driver.get(self.url)
@@ -256,6 +256,8 @@ class Scraper():
             self.driver.implicitly_wait(10)
         except ElementNotInteractableException:
             self._nav_to_sale_pg()
+
+
    
     ''' The load_more_products function selects the 'load more' button on the sale website 
         to load more products.
@@ -336,14 +338,14 @@ class Scraper():
             link = self.shop_link_list[i]
             self.driver.implicitly_wait(5)
             self.driver.get(link)
-            time.sleep(2)
+            time.sleep(0.5)
     
             uuid_num = str(uuid.uuid4())
             uuid_num = uuid_num[:8]
 
             # Selects the "X" on the 'student discount' popup
             try:
-                self.driver.implicitly_wait(5)
+                self.driver.implicitly_wait(2)
                 popup = self.driver.find_element(By.XPATH, '//*[@id="att_lightbox_close"]')
                 popup.click()
             except (ElementNotInteractableException, NoSuchElementException):
@@ -351,7 +353,7 @@ class Scraper():
             
              # Selects the show more button to expose the relevant data for scraping  
             try:
-                self.driver.implicitly_wait(5)
+                self.driver.implicitly_wait(2)
                 self.show_more_button = self.driver.find_element(By.XPATH, '//div[@class="show-more"]')
                 self.actions.move_to_element(self.show_more_button)
                 self.show_more_button.click()
@@ -702,9 +704,6 @@ class Scraper():
         self.driver.quit()
 
 ASOS = Scraper()
-
-
-
 
 if __name__ == "__main__": 
     ASOS = Scraper()
