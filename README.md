@@ -457,6 +457,10 @@ ________________________________________________________________________________
 #### ISSUE : There was a problem getting the node explorer to work with my local machine but the other metrics were able to viewed successfully.
 ![image](https://user-images.githubusercontent.com/102431019/185680504-bef58bd8-4fd1-4886-87e3-2c3ad225e3a7.png)
 
+-A `Grafana` Dashboard was then created to observe the Prometheus metrics in a clear and informative way. 
+![image](https://user-images.githubusercontent.com/102431019/185690206-0eb3b649-cfb0-44f2-9f06-a4095e79d10c.png)
+
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Milestone 9:Setup CI/CD Pipeline for Docker Image (Completed)
 
