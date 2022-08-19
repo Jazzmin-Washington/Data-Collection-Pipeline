@@ -38,7 +38,16 @@ ________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Milestone 2: Creation of Scraper Class (Completed)
 - First, `load_and_accept_cookies()`function was created to bypass cookies on the ASOS website:
-  *An event listener was added for unit testing this function
+  *An event listener was added for unit testing this function.
+  
+         def _load_and_accept_cookies(self):
+              self.driver.implicitly_wait(10)
+              accept_cookies_button = WebDriverWait(self.driver, self.delay).until(EC.presence_of_element_located((By.XPATH,'//*[@id="onetrust-accept-btn-handler"]')))
+              self.driver.execute_script("var ele = arguments[0];ele.addEventListener('click', function() {ele.setAttribute('automationTrack', 'True' );});",accept_cookies_button)
+              accept_cookies_button.click()
+              time.sleep(1)
+              self.unit_Test_Cookies = accept_cookies_button.get_attribute("automationTrack")
+              return self.unit_Test_Cookies
 
 - TO navigate from the ASOS homepage, the `nav_to_sale_pg` function selects the options to navigate to the either the men or women sale website. This ensures the correct website will be scraped
        
@@ -222,7 +231,7 @@ ________________________________________________________________________________
 
 - The scraper will be used to continuously collect data, functions needed to be built to  A) prevent rescraping the same data, B) retrieve previously scraped data, C) appended the data to previous files, and D )upload the new appended files. 
 
- #### A) Preventing rescraping the same data -- Postgres-- TO prevent rescraping the same data, a QUERY was done to create two different tuples. We created two different Queries because some products do not have a `product_id` and therefore would need to be matched based on the `product_name`.
+#### A) Preventing rescraping the same data -- Postgres-- TO prevent rescraping the same data, a QUERY was done to create two different tuples. We created two different Queries because some products do not have a `product_id` and therefore would need to be matched based on the `product_name`.
   
         def _previously_scraped(self):
              print("\n Let's check your SQL details...\n")
@@ -282,7 +291,7 @@ ________________________________________________________________________________
                    self.full_item_list.append(product)
                    
                    
-  #### B) Retrieving previously scraped data -- AWS S3 Bucket -- To prevent the S3 bucket from rescraping the same data and allow for the files to be appended in later code. `_prev_data_retrieve()` function was added. 
+#### B) Retrieving previously scraped data -- AWS S3 Bucket -- To prevent the S3 bucket from rescraping the same data and allow for the files to be appended in later code. `_prev_data_retrieve()` function was added. 
   
        def _prev_data_retrieve(self):
             try:
@@ -361,7 +370,7 @@ ________________________________________________________________________________
               if '.csv' in files or '.json' in files:
                   os.remove(f'{files}')
 
-   #### D) Uploading the appended files: The appended files were then uploaded using the previously shown `_s3_data_dump()` and `_s3_image_dump()` functions for AWS S3. The `_postgres_dump()` function was used to append the 'self.products' dataframe references in the `_save_data()` function because this dataframe had already been checked against the Postgres Database via `_previously_scraped()` function listed in A).
+ #### D) Uploading the appended files: The appended files were then uploaded using the previously shown `_s3_data_dump()` and `_s3_image_dump()` functions for AWS S3. The `_postgres_dump()` function was used to append the 'self.products' dataframe references in the `_save_data()` function because this dataframe had already been checked against the Postgres Database via `_previously_scraped()` function listed in A).
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Milestone 7: Making the Scraper User Friendly (Completed)
@@ -415,7 +424,7 @@ ________________________________________________________________________________
     -  Put everything required by the scraper within the container
     -  Install any dependencies
     -  Run the main Python file
-    -  
+    
  ##### Pictured Below: In the left window is the requirement.txt file which list all the required dependencies and on the right is the Dockerfile used to build the docker images.
  ![image](https://user-images.githubusercontent.com/102431019/185673647-0343fba0-8932-438f-9cf0-01c26141a43c.png)
 
