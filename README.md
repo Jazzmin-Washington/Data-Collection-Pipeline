@@ -329,46 +329,36 @@ ________________________________________________________________________________
  #### C) Appending Data from New Scrapes -- AWS S3 Bucket -- The previously scraped data and saved data was then converted to a dataframe and `pandas.concat` was used to merge the two dataframes. Additionally, the `pd.drop_duplicates()` function was also used to ensure there were not repeated entries. Finally, the files containing the individual dataframes were deleted and the new appended file was then saved as a csv or json file. 
  
      def _prev_data_append(self):
-          os.chdir(self.previously_scraped_path)
-          for files in os.listdir():
-              if '.json' in files and 'Women' in files:
-                  prev_data_scrape = pd.read_json(f'{files}')
-                  updated_df = pd.concat([prev_data_scrape.reset_index(drop=True), 
-                                self.products.reset_index(drop=True)], axis=0, join='inner',ignore_index=True)
-                  updated_df = updated_df.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
-                  os.remove(f'{files}')
-                  updated_df.to_json(r'ASOS_Women_Data_Updated.json')
+        self.previously_scraped_path = f'{self.data_dir}/previously_scraped'
+        os.chdir(self.previously_scraped_path)
+        for files in os.listdir():
+            if '.json' in files and self.gender in files:
+                os.remove(f'{files}')
 
+            elif '.csv' in files and 'Women' in files and self.gender == 'Women':
+                prev_data_scrape = pd.read_csv(f'{files}')
+                updated_df_2 = pd.concat([prev_data_scrape.reset_index(drop=True), 
+                            self.products.reset_index(drop=True)], axis=0, join='inner',ignore_index=True)
+                updated_df_2 = updated_df_2.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
+                os.remove(f'{files}')
+                updated_df_2.to_csv(r'ASOS_Women_Data_Updated.csv')
+                updated_df_2.to_json(r'ASOS_Women_Data_Updated.json')
+          
 
-              elif '.csv' in files and 'Women' in files:
-                  prev_data_scrape = pd.read_csv(f'{files}')
-                  updated_df_2 = pd.concat([prev_data_scrape.reset_index(drop=True), 
-                                self.products.reset_index(drop=True)], axis=0, join='inner',ignore_index=True)
-                  updated_df_2 = updated_df_2.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
-                  os.remove(f'{files}')
-                  updated_df_2.to_csv(r'ASOS_Women_Data_Updated.csv')
+            elif '.csv' in files and self.gender in files:
+                prev_data_scrape = pd.read_csv(f'{files}')
+                updated_df_2 = pd.concat([prev_data_scrape.reset_index(drop=True), 
+                            self.products.reset_index(drop=True)], axis=0, join='inner',ignore_index=True)
+                updated_df_2 = updated_df_2.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
+                os.remove(f'{files}')
+                updated_df_2.to_csv(r'ASOS_Men_Data_Updated.csv')
+                updated_df_2.to_json(r'ASOS_Men_Data_Updated.json')
 
-              elif '.json' in files and 'Men' in files:
-                  prev_data_scrape = pd.read_json(f'{files}')
-                  updated_df = pd.concat([prev_data_scrape.reset_index(drop=True), 
-                                self.products.reset_index(drop=True)], axis=0, join='inner',ignore_index=True)
-                  updated_df = updated_df.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
-                  os.remove(f'{files}')
-                  updated_df.to_json(r'ASOS_Men_Data_Updated.json')
-
-              elif '.csv' in files and 'Men' in files:
-                  prev_data_scrape = pd.read_csv(f'{files}')
-                  updated_df_2 = pd.concat([prev_data_scrape.reset_index(drop=True), 
-                                self.products.reset_index(drop=True)], axis=0, join='inner',ignore_index=True)
-                  updated_df_2 = updated_df_2.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
-                  os.remove(f'{files}')
-                  updated_df_2.to_csv(r'ASOS_Men_Data_Updated.csv')
-
-          file_path = f'{self.data_dir}/ASOS_data'     
-          os.chdir(file_path)
-          for files in os.listdir():
-              if '.csv' in files or '.json' in files:
-                  os.remove(f'{files}')
+        file_path = f'{self.data_dir}/ASOS_data'     
+        os.chdir(file_path)
+        for files in os.listdir():
+            if '.csv' in files or '.json' in files:
+                os.remove(f'{files}')
 
  #### D) Uploading the appended files: The appended files were then uploaded using the previously shown `_s3_data_dump()` and `_s3_image_dump()` functions for AWS S3. The `_postgres_dump()` function was used to append the 'self.products' dataframe references in the `_save_data()` function because this dataframe had already been checked against the Postgres Database via `_previously_scraped()` function listed in A).
 
