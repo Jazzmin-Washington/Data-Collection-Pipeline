@@ -462,19 +462,12 @@ class Scraper():
     
     '''The _prev_data_append allows the user to append the data scraped from the webpage to their files within the S3 Bucket in a neat manner'''
 
-    def _prev_data_append(self):
+     def _prev_data_append(self):
+        self.previously_scraped_path = f'{self.data_dir}/previously_scraped'
         os.chdir(self.previously_scraped_path)
         for files in os.listdir():
-    
-            if '.json' in files and 'Women' in files and self.gender == 'Women':
-                prev_data_scrape = pd.read_json(f'{files}')
-                updated_df = pd.concat([prev_data_scrape.reset_index(drop=True), 
-                            self.products.reset_index(drop=True)], axis=0, join='inner',ignore_index=True)
-                updated_df = updated_df.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
+            if '.json' in files and self.gender in files:
                 os.remove(f'{files}')
-                print(updated_df)
-                updated_df.to_json(r'ASOS_Women_Data_Updated.json')
-                    
 
             elif '.csv' in files and 'Women' in files and self.gender == 'Women':
                 prev_data_scrape = pd.read_csv(f'{files}')
@@ -483,24 +476,17 @@ class Scraper():
                 updated_df_2 = updated_df_2.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
                 os.remove(f'{files}')
                 updated_df_2.to_csv(r'ASOS_Women_Data_Updated.csv')
+                updated_df_2.to_json(r'ASOS_Women_Data_Updated.json')
+          
 
-        
-            elif '.json' in files and 'Men' in files:
-                    prev_data_scrape = pd.read_json(f'{files}')
-                    updated_df = pd.concat([prev_data_scrape.reset_index(drop=True), 
-                                self.products.reset_index(drop=True)], axis=0, join='inner',ignore_index=True)
-                    updated_df = updated_df.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
-                    print(updated_df)
-                    os.remove(f'{files}')
-                    updated_df.to_json(r'ASOS_Men_Data_Updated.json')
-
-            elif '.csv' in files and 'Men' in files:
+            elif '.csv' in files and self.gender in files:
                 prev_data_scrape = pd.read_csv(f'{files}')
                 updated_df_2 = pd.concat([prev_data_scrape.reset_index(drop=True), 
                             self.products.reset_index(drop=True)], axis=0, join='inner',ignore_index=True)
                 updated_df_2 = updated_df_2.drop_duplicates(subset =['product_id', 'product_name'], keep ='first')
                 os.remove(f'{files}')
                 updated_df_2.to_csv(r'ASOS_Men_Data_Updated.csv')
+                updated_df_2.to_json(r'ASOS_Men_Data_Updated.json')
 
         file_path = f'{self.data_dir}/ASOS_data'     
         os.chdir(file_path)
